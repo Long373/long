@@ -200,6 +200,52 @@ body{
 .small-note{font-size:11px; color:var(--text-dim); text-align:center; margin-top:4px;}
 .progress-mini{height:6px; border-radius:4px; background:var(--bar-bg); overflow:hidden; margin-top:4px;}
 .progress-mini i{display:block; height:100%; background:var(--accent);}
+
+/* ---------- TEXT SELECTION FIX ----------
+   Toàn bộ UI game chặn bôi đen để tránh chạm nhầm, nhưng ô nhập liệu,
+   log và các vùng có class .copyable vẫn cho phép bôi đen / copy bình thường. */
+input, textarea, select,
+.copyable, .copyable *{
+  -webkit-user-select:text !important;
+  -moz-user-select:text !important;
+  user-select:text !important;
+}
+input, textarea{ -webkit-touch-callout:default; }
+
+/* ---------- ADMIN: hover toggle button ---------- */
+#adminHoverBtn{
+  position:fixed; width:52px; height:52px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #3a2f10, #14100a 75%);
+  border:1.5px solid var(--gold); box-shadow:0 0 12px rgba(212,175,55,.5), 0 3px 8px rgba(0,0,0,.5);
+  z-index:400; display:none; align-items:center; justify-content:center;
+  font-size:22px; color:var(--gold-hi); cursor:grab; touch-action:none;
+}
+#adminHoverBtn.show{display:flex;}
+#adminHoverBtn:active{cursor:grabbing;}
+
+/* ---------- ADMIN PANEL ---------- */
+#adminPanel{
+  position:fixed; z-index:390; width:min(94vw,380px); max-height:80vh; overflow-y:auto;
+  background:linear-gradient(180deg,#171a2c,#0b0c15); border:1.5px solid var(--gold); border-radius:14px;
+  padding:12px; box-shadow:0 0 26px rgba(212,175,55,.3); display:none;
+}
+#adminPanel.show{display:block;}
+#adminPanel h2{font-family:'Ma Shan Zheng',cursive; color:var(--gold-hi); text-align:center; margin:0 0 8px; font-size:20px;}
+#adminPanel .adm-head{display:flex; justify-content:space-between; align-items:center; cursor:move; padding-bottom:6px; border-bottom:1px dashed var(--border); margin-bottom:8px;}
+#adminPanel .adm-head b{color:var(--gold-hi); font-size:13px;}
+#adminPanel .adm-close{background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:2px 8px; font-size:16px; cursor:pointer;}
+.adm-group{margin-bottom:10px; border:1px solid var(--border-soft); border-radius:10px; padding:8px;}
+.adm-group h4{margin:0 0 6px; font-size:12px; color:var(--gold); text-transform:uppercase; letter-spacing:.5px;}
+.adm-field{display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; font-size:12px;}
+.adm-field label{color:var(--text-dim); flex:1;}
+.adm-field input[type=number], .adm-field input[type=text], .adm-field select{
+  width:118px; background:var(--panel2); border:1px solid var(--border-soft); border-radius:8px; color:var(--text);
+  padding:5px 6px; font-size:12px; font-family:'Noto Serif SC',serif;
+}
+.adm-field input[type=checkbox]{width:18px; height:18px;}
+.adm-row-btns{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+.adm-row-btns .btn{min-height:38px; font-size:11.5px; margin-top:0;}
+#adminPanel .btn.apply{background:linear-gradient(180deg,var(--accent-dim),#0c2c22); border-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -267,8 +313,12 @@ body{
         <h3>Trạng thái viễn chinh</h3>
         <p id="expeditionStatus">Chưa xuất chinh.</p>
         <div class="progress-mini"><i id="expeditionProg" style="width:0%"></i></div>
-        <button class="btn primary" id="btnExpedition">Xuất Chinh (60s)</button>
+        <p class="small-note">Mỗi cảnh giới mở khóa một Bản Đồ Lịch Luyện riêng — cảnh giới càng cao, phần thưởng Linh Thạch/Tu Vi/Tiên Tinh càng lớn, đủ tài nguyên để đột phá và luyện đan.</p>
       </div>
+
+      <div class="section-title">Bản Đồ Viễn Chinh</div>
+      <div id="expeditionMapList"></div>
+
       <div class="card" id="petCard" style="display:none;">
         <h3>Tiên Thú: <span id="petName">—</span></h3>
         <p>Tự động nhặt Thảo Dược quý tộc mỗi 15 giây.</p>
@@ -399,6 +449,100 @@ body{
   </div>
 
   <div class="modal-overlay hidden" id="ascendOverlay" style="z-index:300;"></div>
+
+  <!-- ============ ADMIN: PASSWORD GATE ============ -->
+  <div class="modal-overlay hidden" id="modalAdminPass" style="z-index:500;">
+    <div class="modal-box">
+      <h2>🔐 Bí Cảnh Quản Trị</h2>
+      <p class="small-note" style="margin-bottom:10px;">Nhập mật khẩu để mở Admin Panel.</p>
+      <input type="password" id="adminPassInput" class="copyable" placeholder="Mật khẩu..." style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); background:var(--panel2); color:var(--text); font-size:14px; margin-bottom:10px;">
+      <div class="btn-row">
+        <button class="btn ghost" id="btnAdminPassCancel">Hủy</button>
+        <button class="btn primary" id="btnAdminPassOk">Xác Nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN: HOVER TOGGLE BUTTON ============ -->
+  <div id="adminHoverBtn">⚙</div>
+
+  <!-- ============ ADMIN PANEL ============ -->
+  <div id="adminPanel">
+    <div class="adm-head" id="adminDragHandle">
+      <b>⚙ Admin Panel — Toàn Quyền Chỉnh Sửa</b>
+      <button class="adm-close" id="btnAdminClose">✕</button>
+    </div>
+
+    <div class="adm-group">
+      <h4>Thông Tin Chung</h4>
+      <div class="adm-field"><label>Tên nhân vật</label><input type="text" class="copyable" id="admName"></div>
+      <div class="adm-field"><label>Trận Doanh</label>
+        <select id="admFaction"><option value="chinh">Chính Đạo</option><option value="ma">Ma Đạo</option></select>
+      </div>
+      <div class="adm-field"><label>Tên Linh Căn</label><input type="text" class="copyable" id="admLCName"></div>
+      <div class="adm-field"><label>Hệ số Linh Căn (x)</label><input type="number" step="0.1" id="admLCMult"></div>
+    </div>
+
+    <div class="adm-group">
+      <h4>Cảnh Giới</h4>
+      <div class="adm-field"><label>Giới</label>
+        <select id="admRealmSet"><option value="pham">Phàm Giới</option><option value="tien">Tiên Giới</option></select>
+      </div>
+      <div class="adm-field"><label>Đại cảnh giới (0-8 / 0-4)</label><input type="number" id="admRealmIdx" min="0" max="8"></div>
+      <div class="adm-field"><label>Tầng (1-9)</label><input type="number" id="admTang" min="1" max="9"></div>
+      <div class="adm-field"><label>Đã Phi Thăng?</label><input type="checkbox" id="admImmortal"></div>
+    </div>
+
+    <div class="adm-group">
+      <h4>Tài Nguyên</h4>
+      <div class="adm-field"><label>Tu Vi</label><input type="number" id="admTuVi"></div>
+      <div class="adm-field"><label>Linh Thạch</label><input type="number" id="admLinhThach"></div>
+      <div class="adm-field"><label>Tiên Tinh</label><input type="number" id="admTienTinh"></div>
+      <div class="adm-field"><label>Thọ Nguyên</label><input type="number" id="admThoNguyen"></div>
+      <div class="adm-field"><label>Thọ Nguyên Tối Đa</label><input type="number" id="admThoNguyenMax"></div>
+      <div class="adm-field"><label>Sinh Lực (HP)</label><input type="number" id="admHp"></div>
+      <div class="adm-field"><label>Sinh Lực Tối Đa</label><input type="number" id="admHpMax"></div>
+      <div class="adm-field"><label>Thần Lực (%)</label><input type="number" id="admDivinePower"></div>
+    </div>
+
+    <div class="adm-group">
+      <h4>Tiên Giới / Chức Nghiệp</h4>
+      <div class="adm-field"><label>Tiên Chức</label>
+        <select id="admTienChuc"><option value="">— Chưa chọn —</option><option value="kiem">Kiếm Tiên</option><option value="tran">Trận Pháp Sư</option><option value="ngu">Ngự Thú Sư</option></select>
+      </div>
+    </div>
+
+    <div class="adm-group">
+      <h4>Luyện Đan</h4>
+      <div class="adm-field"><label>Đã mua Đan Thư?</label><input type="checkbox" id="admManual"></div>
+      <div class="adm-field"><label>Kinh nghiệm Đan Sư</label><input type="number" id="admDanSuExp"></div>
+      <div class="adm-field"><label>Linh Hồn Cảnh Giới (0-3)</label><input type="number" id="admHonCanh" min="0" max="3"></div>
+    </div>
+
+    <div class="adm-group">
+      <h4>Công Pháp Sở Hữu</h4>
+      <div id="admGongfaList"></div>
+    </div>
+
+    <div class="adm-group">
+      <h4>Áp Dụng Thay Đổi</h4>
+      <button class="btn apply" id="btnAdminApply">✔ Áp Dụng Toàn Bộ</button>
+    </div>
+
+    <div class="adm-group">
+      <h4>Lệnh Nhanh (Cheat)</h4>
+      <div class="adm-row-btns">
+        <button class="btn small" id="admCheatMaxRes">+1 Triệu Tài Nguyên</button>
+        <button class="btn small" id="admCheatFullTuVi">Đầy Tu Vi</button>
+        <button class="btn small" id="admCheatFullHp">Hồi Đầy Sinh Lực</button>
+        <button class="btn small" id="admCheatMaxLifespan">Đầy Thọ Nguyên</button>
+        <button class="btn small" id="admCheatGiveManual">Nhận Đan Thư</button>
+        <button class="btn small" id="admCheatGivePill">Nhận Đan Hoàn Mỹ</button>
+        <button class="btn small" id="admCheatAllGongfa">Học Hết Công Pháp</button>
+        <button class="btn small danger" id="admCheatReset">Reset Toàn Bộ</button>
+      </div>
+    </div>
+  </div>
 
 </div>
 
@@ -548,7 +692,7 @@ const DEFAULT_STATE = () => ({
   honCanhIdx:0,
   pills:[], // {id,name,quality,effect}
 
-  expeditionActive:false, expeditionEnd:0, expeditionTotal:60,
+  expeditionActive:false, expeditionEnd:0, expeditionTotal:60, expeditionMapId:null,
   petHerbCount:0, petTimer:0,
 
   linhDienState:"empty", // empty | growing | ready
@@ -643,13 +787,12 @@ function tick(){
   // burn check
   if(S.burnActive && now > S.burnEnd) S.burnActive = false;
 
-  // cultivation
-  if(!(isMaxPhamStage() || isMaxTienStage())){
+  // cultivation — chỉ dừng khi tu vi đã đầy (đủ điều kiện đột phá/phi thăng),
+  // không phụ thuộc vào việc đang ở tầng cao nhất hay không
+  if(S.tuVi < tuViMax()){
     S.tuVi += cultivationSpeed() * dt * 8;
-  } else {
-    // still trickle a tiny amount so bar shows full & user notices breakthrough is ready
+    S.tuVi = Math.min(S.tuVi, tuViMax());
   }
-  S.tuVi = Math.min(S.tuVi, tuViMax());
 
   // passive currency trickle
   S.linhThach += dt * (2 + globalStageIndex()*0.4);
@@ -879,24 +1022,62 @@ function burnLifespan(){
 }
 
 /* ===================================================================
-   EXPEDITION
+   EXPEDITION MAPS — mỗi cảnh giới một bản đồ riêng, phần thưởng tăng dần
+   theo cấp độ để đảm bảo đủ tài nguyên (Linh Thạch / Tu Vi / Tiên Tinh)
+   cho Đột Phá và Luyện Đan ở giai đoạn tương ứng.
 =================================================================== */
-function startExpedition(){
+const EXPEDITION_MAPS = [
+  // Phàm Giới
+  {id:"m0", realmSet:"pham", realmIdx:0, name:"Sơn Dã Ngoại Vực", desc:"Vùng núi non ngoài rìa tông môn, thích hợp cho tân thủ."},
+  {id:"m1", realmSet:"pham", realmIdx:1, name:"U Cốc Ma Lâm", desc:"Rừng rậm âm u ẩn chứa yêu thú cấp thấp."},
+  {id:"m2", realmSet:"pham", realmIdx:2, name:"Hoang Nguyên Cổ Địa", desc:"Vùng đất hoang tàn sót lại di tích thượng cổ."},
+  {id:"m3", realmSet:"pham", realmIdx:3, name:"Tuyệt Vực Hắc Sơn", desc:"Ngọn núi đen quanh năm sấm sét, ẩn tàng cơ duyên."},
+  {id:"m4", realmSet:"pham", realmIdx:4, name:"Thiên Ngoại Tiên Đảo", desc:"Hòn đảo trôi nổi giữa mây mù, linh khí nồng đậm."},
+  {id:"m5", realmSet:"pham", realmIdx:5, name:"Hư Không Toái Vực", desc:"Không gian rạn nứt, nguy hiểm nhưng giàu tài nguyên."},
+  {id:"m6", realmSet:"pham", realmIdx:6, name:"Cửu U Minh Giới", desc:"Cõi u minh chín tầng, ma khí ngút trời."},
+  {id:"m7", realmSet:"pham", realmIdx:7, name:"Thượng Cổ Chiến Trường", desc:"Chiến trường thượng cổ, di cốt cường giả khắp nơi."},
+  {id:"m8", realmSet:"pham", realmIdx:8, name:"Lôi Kiếp Chi Điên", desc:"Đỉnh núi hứng trọn thiên lôi, thử thách trước khi Phi Thăng."},
+  // Tiên Giới
+  {id:"t0", realmSet:"tien", realmIdx:0, name:"Tiên Vực Ngoại Vi", desc:"Vùng biên ải Tiên Giới, tiên khí thanh khiết."},
+  {id:"t1", realmSet:"tien", realmIdx:1, name:"Kim Tiên Bảo Địa", desc:"Bảo địa của các vị Kim Tiên, kỳ trân dị bảo vô số."},
+  {id:"t2", realmSet:"tien", realmIdx:2, name:"Ngọc Tiên Thánh Cảnh", desc:"Thánh cảnh linh khí ngập tràn, tiên thú thành đàn."},
+  {id:"t3", realmSet:"tien", realmIdx:3, name:"Đại La Tiên Vực", desc:"Tiên vực bậc cao, không gian ổn định vĩnh hằng."},
+  {id:"t4", realmSet:"tien", realmIdx:4, name:"Hồng Mông Thái Cổ", desc:"Cõi hỗn mang thái cổ, nơi Đạo Tổ độ kiếp thành đạo."}
+];
+function mapFlatIndex(map){ return map.realmSet==="pham" ? map.realmIdx*9 : 81+map.realmIdx*9; }
+function mapUnlocked(map){ return globalStageIndex() >= mapFlatIndex(map); }
+function mapDuration(map){ return Math.round(40 + Math.min(90, mapFlatIndex(map)*1.4)); }
+function mapRewards(map){
+  const idx = mapFlatIndex(map);
+  const linhThach = Math.round(80 + idx*22);
+  const tuVi = Math.round(25 + idx*9);
+  const tienTinh = map.realmSet==="tien" ? Math.round(2 + idx*0.6) : 0;
+  return {linhThach, tuVi, tienTinh};
+}
+function startExpedition(mapId){
   if(S.expeditionActive) return;
+  const map = EXPEDITION_MAPS.find(m=>m.id===mapId);
+  if(!map || !mapUnlocked(map)){ toast("Bản đồ chưa mở khóa!"); return; }
   S.expeditionActive = true;
-  S.expeditionTotal = 60;
+  S.expeditionMapId = mapId;
+  S.expeditionTotal = mapDuration(map);
   S.expeditionEnd = Date.now()+S.expeditionTotal*1000;
-  log("⚔ Xuất chinh Lịch Luyện...");
+  log("⚔ Xuất chinh tới "+map.name+"...");
+  render();
 }
 function finishExpedition(){
   S.expeditionActive = false;
-  let reward = 80 + globalStageIndex()*10;
-  if(S.tienChuc==="kiem" && S.realmSet==="tien") reward *= 1.3;
-  S.linhThach += reward;
-  const tuviGain = 20 + globalStageIndex()*3;
-  S.tuVi = Math.min(tuViMax(), S.tuVi+tuviGain);
-  log("🏆 Lịch Luyện hoàn thành! Nhận "+fmt(reward)+" Linh Thạch và "+fmt(tuviGain)+" tu vi.");
-  toast("Lịch Luyện hoàn thành! +"+fmt(reward)+" Linh Thạch");
+  const map = EXPEDITION_MAPS.find(m=>m.id===S.expeditionMapId) || EXPEDITION_MAPS[0];
+  let {linhThach, tuVi, tienTinh} = mapRewards(map);
+  if(S.tienChuc==="kiem" && S.realmSet==="tien") { linhThach = Math.round(linhThach*1.3); tienTinh = Math.round(tienTinh*1.3); }
+  S.linhThach += linhThach;
+  S.tienTinh += tienTinh;
+  S.tuVi = Math.min(tuViMax(), S.tuVi+tuVi);
+  let msg = "🏆 "+map.name+" hoàn thành! Nhận "+fmt(linhThach)+" Linh Thạch, "+fmt(tuVi)+" tu vi";
+  if(tienTinh>0) msg += ", "+fmt(tienTinh)+" Tiên Tinh";
+  msg += ".";
+  log(msg);
+  toast("Lịch Luyện hoàn thành! +"+fmt(linhThach)+" Linh Thạch");
 }
 
 /* ===================================================================
@@ -1067,16 +1248,17 @@ function render(){
   }
 
   // expedition
-  document.getElementById('btnExpedition').disabled = S.expeditionActive;
   if(S.expeditionActive){
+    const map = EXPEDITION_MAPS.find(m=>m.id===S.expeditionMapId) || EXPEDITION_MAPS[0];
     const remain = Math.max(0, S.expeditionEnd-Date.now());
     const pct = 100-(remain/(S.expeditionTotal*1000)*100);
-    document.getElementById('expeditionStatus').textContent = "Đang viễn chinh... còn "+Math.ceil(remain/1000)+" giây.";
+    document.getElementById('expeditionStatus').textContent = "Đang viễn chinh tại "+map.name+"... còn "+Math.ceil(remain/1000)+" giây.";
     document.getElementById('expeditionProg').style.width = clamp(pct,0,100)+"%";
   } else {
     document.getElementById('expeditionStatus').textContent = "Sẵn sàng xuất chinh.";
     document.getElementById('expeditionProg').style.width = "0%";
   }
+  renderExpeditionMaps();
   document.getElementById('petCard').style.display = S.tienChuc==="ngu" ? "block":"none";
   if(S.tienChuc==="ngu"){
     document.getElementById('petName').textContent = TIEN_THU_NAMES[0];
@@ -1126,6 +1308,31 @@ function render(){
   document.getElementById('manualWarning').style.display = S.hasManual ? "none":"block";
   document.getElementById('btnRefine').disabled = !S.hasManual || S.linhThach<100;
   renderPills();
+}
+
+function renderExpeditionMaps(){
+  const wrap = document.getElementById('expeditionMapList');
+  if(!wrap) return;
+  wrap.innerHTML = EXPEDITION_MAPS.map(map=>{
+    const unlocked = mapUnlocked(map);
+    const {linhThach, tuVi, tienTinh} = mapRewards(map);
+    const dur = mapDuration(map);
+    const realmLabel = (map.realmSet==="pham"?PHAM_REALMS[map.realmIdx]:TIEN_REALMS[map.realmIdx])+" Kỳ";
+    const isRunningHere = S.expeditionActive && S.expeditionMapId===map.id;
+    let rewardTxt = fmt(linhThach)+" Linh Thạch · "+fmt(tuVi)+" Tu Vi"+(tienTinh>0?" · "+fmt(tienTinh)+" Tiên Tinh":"");
+    let btnLabel = isRunningHere ? "Đang Viễn Chinh..." : (unlocked ? "Xuất Chinh ("+dur+"s)" : "Khóa — Cần "+realmLabel);
+    return `<div class="item-row" style="align-items:flex-start;">
+      <div class="info">
+        <div class="name">${map.name} <span class="badge ${unlocked?'gold':''}">${realmLabel}</span></div>
+        <div class="desc">${map.desc}</div>
+        <div class="desc">Thưởng: ${rewardTxt}</div>
+      </div>
+      <button class="btn small" style="width:auto; margin:0; white-space:nowrap;" data-map="${map.id}" ${(!unlocked || S.expeditionActive)?'disabled':''}>${btnLabel}</button>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll('[data-map]').forEach(b=>{
+    b.addEventListener('click', ()=>startExpedition(b.dataset.map));
+  });
 }
 
 function renderGongfaShop(){
@@ -1243,7 +1450,6 @@ function initEvents(){
 
   document.getElementById('btnBreakthrough').addEventListener('click', doBreakthrough);
   document.getElementById('btnBurnLife').addEventListener('click', burnLifespan);
-  document.getElementById('btnExpedition').addEventListener('click', startExpedition);
   document.getElementById('btnBuyManual').addEventListener('click', buyManual);
   document.getElementById('btnReset').addEventListener('click', resetGame);
   document.getElementById('btnRefine').addEventListener('click', refinePill);
@@ -1263,6 +1469,9 @@ function initEvents(){
 
 function boot(){
   initEvents();
+  initAdminGestures();
+  initAdminHoverButton();
+  initAdminEvents();
   const loaded = loadGame();
   if(loaded && loaded.started){
     S = Object.assign(DEFAULT_STATE(), loaded);
@@ -1291,6 +1500,234 @@ function boot(){
 }
 function cultivationSpeedSafe(){ try{return cultivationSpeed();}catch(e){return 1;} }
 function tuViMaxSafe(){ try{return tuViMax();}catch(e){return 999999;} }
+
+/* ===================================================================
+   ADMIN PANEL SYSTEM
+   Kích hoạt: chạm 3 lần vào màn hình -> lướt (vuốt) từ phải qua trái
+   trong vài giây -> nhập mật khẩu -> hiện nút tròn nổi (kéo thả được)
+   để bật/tắt Admin Panel chỉnh sửa toàn bộ dữ liệu game.
+=================================================================== */
+const ADMIN_PASSWORD = "tutien2026";
+
+const tapSeq = {count:0, timer:null};
+const swipeArm = {active:false, timer:null};
+let swipeTrack = null; // {x,y}
+
+function armSwipeWindow(){
+  swipeArm.active = true;
+  clearTimeout(swipeArm.timer);
+  swipeArm.timer = setTimeout(()=>{ swipeArm.active = false; }, 4000);
+}
+
+function initAdminGestures(){
+  document.addEventListener('pointerup', (e)=>{
+    // bỏ qua nếu đang thao tác bên trong admin panel / modal mật khẩu
+    if(e.target.closest('#adminPanel') || e.target.closest('#modalAdminPass') || e.target.closest('#adminHoverBtn')) return;
+    tapSeq.count += 1;
+    clearTimeout(tapSeq.timer);
+    tapSeq.timer = setTimeout(()=>{ tapSeq.count = 0; }, 800);
+    if(tapSeq.count >= 3){
+      tapSeq.count = 0;
+      armSwipeWindow();
+    }
+  }, {passive:true});
+
+  document.addEventListener('pointerdown', (e)=>{
+    if(!swipeArm.active) return;
+    swipeTrack = {x:e.clientX, y:e.clientY};
+  }, {passive:true});
+
+  document.addEventListener('pointerup', (e)=>{
+    if(!swipeArm.active || !swipeTrack) return;
+    const dx = e.clientX - swipeTrack.x;
+    const dy = e.clientY - swipeTrack.y;
+    swipeTrack = null;
+    if(dx < -70 && Math.abs(dy) < 60){
+      swipeArm.active = false;
+      clearTimeout(swipeArm.timer);
+      openAdminPasswordGate();
+    }
+  }, {passive:true});
+}
+
+function openAdminPasswordGate(){
+  document.getElementById('adminPassInput').value = "";
+  document.getElementById('modalAdminPass').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('adminPassInput').focus(), 100);
+}
+function checkAdminPassword(){
+  const val = document.getElementById('adminPassInput').value;
+  if(val === ADMIN_PASSWORD){
+    document.getElementById('modalAdminPass').classList.add('hidden');
+    document.getElementById('adminHoverBtn').classList.add('show');
+    toast("Đã mở khóa Admin Panel!");
+  } else {
+    toast("Sai mật khẩu!");
+  }
+}
+
+/* ---- Hover button: kéo thả + chạm để bật/tắt panel ---- */
+function initAdminHoverButton(){
+  const btn = document.getElementById('adminHoverBtn');
+  btn.style.right = "14px";
+  btn.style.bottom = "78px";
+  let dragging = false, moved = false, startX=0, startY=0, origRight=0, origBottom=0;
+
+  btn.addEventListener('pointerdown', (e)=>{
+    dragging = true; moved = false;
+    startX = e.clientX; startY = e.clientY;
+    const rect = btn.getBoundingClientRect();
+    origRight = window.innerWidth - rect.right;
+    origBottom = window.innerHeight - rect.bottom;
+    btn.setPointerCapture(e.pointerId);
+  });
+  btn.addEventListener('pointermove', (e)=>{
+    if(!dragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if(Math.abs(dx)>6 || Math.abs(dy)>6) moved = true;
+    if(moved){
+      btn.style.right = Math.max(4, origRight - dx) + "px";
+      btn.style.bottom = Math.max(4, origBottom - dy) + "px";
+    }
+  });
+  btn.addEventListener('pointerup', (e)=>{
+    dragging = false;
+    if(!moved){ toggleAdminPanel(); }
+  });
+
+  // panel draggable via header
+  const panel = document.getElementById('adminPanel');
+  const handle = document.getElementById('adminDragHandle');
+  let pdrag=false, px=0, py=0, pr=0, pb=0;
+  handle.addEventListener('pointerdown',(e)=>{
+    pdrag = true; px=e.clientX; py=e.clientY;
+    const rect = panel.getBoundingClientRect();
+    pr = window.innerWidth - rect.right;
+    pb = window.innerHeight - rect.bottom;
+    handle.setPointerCapture(e.pointerId);
+  });
+  handle.addEventListener('pointermove',(e)=>{
+    if(!pdrag) return;
+    const dx = e.clientX-px, dy = e.clientY-py;
+    panel.style.right = Math.max(2, pr-dx)+"px";
+    panel.style.bottom = Math.max(2, pb-dy)+"px";
+  });
+  handle.addEventListener('pointerup',()=>{ pdrag=false; });
+
+  document.getElementById('btnAdminClose').addEventListener('click', ()=>panel.classList.remove('show'));
+}
+function toggleAdminPanel(){
+  const panel = document.getElementById('adminPanel');
+  const willShow = !panel.classList.contains('show');
+  if(willShow){
+    if(!panel.style.right){ panel.style.right="10px"; panel.style.bottom="140px"; }
+    populateAdminPanel();
+  }
+  panel.classList.toggle('show', willShow);
+}
+
+/* ---- Populate / Apply ---- */
+function populateAdminPanel(){
+  if(!S || !S.started) return;
+  document.getElementById('admName').value = S.name;
+  document.getElementById('admFaction').value = S.faction || 'chinh';
+  document.getElementById('admLCName').value = S.linhCan ? S.linhCan.name : '';
+  document.getElementById('admLCMult').value = S.linhCan ? S.linhCan.mult : 1;
+  document.getElementById('admRealmSet').value = S.realmSet;
+  document.getElementById('admRealmIdx').value = S.realmIdx;
+  document.getElementById('admTang').value = S.tang;
+  document.getElementById('admImmortal').checked = !!S.isImmortal;
+  document.getElementById('admTuVi').value = Math.floor(S.tuVi);
+  document.getElementById('admLinhThach').value = Math.floor(S.linhThach);
+  document.getElementById('admTienTinh').value = Math.floor(S.tienTinh);
+  document.getElementById('admThoNguyen').value = Math.floor(S.thoNguyen);
+  document.getElementById('admThoNguyenMax').value = Math.floor(S.thoNguyenMax);
+  document.getElementById('admHp').value = Math.floor(S.hp);
+  document.getElementById('admHpMax').value = Math.floor(S.hpMax);
+  document.getElementById('admDivinePower').value = S.divinePowerPct;
+  document.getElementById('admTienChuc').value = S.tienChuc || '';
+  document.getElementById('admManual').checked = !!S.hasManual;
+  document.getElementById('admDanSuExp').value = S.danSuExp;
+  document.getElementById('admHonCanh').value = S.honCanhIdx;
+
+  const gfWrap = document.getElementById('admGongfaList');
+  gfWrap.innerHTML = GONGFA_LIST.map(g=>`
+    <div class="adm-field"><label>${g.name} (${g.tier})</label>
+      <input type="checkbox" class="adm-gf" data-id="${g.id}" ${S.ownedGongfa.includes(g.id)?'checked':''}>
+    </div>`).join('');
+}
+function applyAdminPanel(){
+  if(!S || !S.started) return;
+  S.name = document.getElementById('admName').value || S.name;
+  S.faction = document.getElementById('admFaction').value;
+  document.body.classList.toggle('faction-ma', S.faction==='ma');
+
+  if(!S.linhCan) S.linhCan = {name:'',mult:1,desc:'',tierName:'',badge:''};
+  S.linhCan.name = document.getElementById('admLCName').value || S.linhCan.name;
+  S.linhCan.mult = parseFloat(document.getElementById('admLCMult').value) || 1;
+
+  S.realmSet = document.getElementById('admRealmSet').value;
+  const maxRealmIdx = (S.realmSet==='pham'?PHAM_REALMS.length:TIEN_REALMS.length)-1;
+  S.realmIdx = clamp(parseInt(document.getElementById('admRealmIdx').value)||0, 0, maxRealmIdx);
+  S.tang = clamp(parseInt(document.getElementById('admTang').value)||1, 1, 9);
+  S.isImmortal = document.getElementById('admImmortal').checked;
+  if(S.isImmortal) document.body.classList.add('ascended'); else document.body.classList.remove('ascended');
+
+  S.tuVi = Math.max(0, parseFloat(document.getElementById('admTuVi').value)||0);
+  S.linhThach = Math.max(0, parseFloat(document.getElementById('admLinhThach').value)||0);
+  S.tienTinh = Math.max(0, parseFloat(document.getElementById('admTienTinh').value)||0);
+  S.thoNguyenMax = Math.max(1, parseFloat(document.getElementById('admThoNguyenMax').value)||1);
+  S.thoNguyen = clamp(parseFloat(document.getElementById('admThoNguyen').value)||0, 0, S.thoNguyenMax);
+  S.hpMax = Math.max(1, parseFloat(document.getElementById('admHpMax').value)||1);
+  S.hp = clamp(parseFloat(document.getElementById('admHp').value)||0, 0, S.hpMax);
+  S.divinePowerPct = Math.max(0, parseFloat(document.getElementById('admDivinePower').value)||0);
+  S.tienChuc = document.getElementById('admTienChuc').value || null;
+  S.hasManual = document.getElementById('admManual').checked;
+  S.danSuExp = Math.max(0, parseInt(document.getElementById('admDanSuExp').value)||0);
+  S.honCanhIdx = clamp(parseInt(document.getElementById('admHonCanh').value)||0, 0, HON_CANH.length-1);
+
+  S.ownedGongfa = Array.from(document.querySelectorAll('.adm-gf:checked')).map(el=>el.dataset.id);
+
+  log("🛠 [Admin] Dữ liệu đã được chỉnh sửa thủ công.");
+  toast("Đã áp dụng thay đổi Admin!");
+  render();
+  saveGame();
+}
+
+function initAdminEvents(){
+  document.getElementById('btnAdminPassOk').addEventListener('click', checkAdminPassword);
+  document.getElementById('adminPassInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkAdminPassword(); });
+  document.getElementById('btnAdminPassCancel').addEventListener('click', ()=>{
+    document.getElementById('modalAdminPass').classList.add('hidden');
+  });
+  document.getElementById('btnAdminApply').addEventListener('click', applyAdminPanel);
+
+  document.getElementById('admCheatMaxRes').addEventListener('click', ()=>{
+    S.linhThach += 1000000; S.tienTinh += 1000000; render(); populateAdminPanel(); toast("+1 Triệu Tài Nguyên!");
+  });
+  document.getElementById('admCheatFullTuVi').addEventListener('click', ()=>{
+    S.tuVi = tuViMax(); render(); populateAdminPanel(); toast("Đầy Tu Vi!");
+  });
+  document.getElementById('admCheatFullHp').addEventListener('click', ()=>{
+    S.hp = S.hpMax; render(); populateAdminPanel(); toast("Đã hồi đầy Sinh Lực!");
+  });
+  document.getElementById('admCheatMaxLifespan').addEventListener('click', ()=>{
+    S.thoNguyen = S.thoNguyenMax; render(); populateAdminPanel(); toast("Đầy Thọ Nguyên!");
+  });
+  document.getElementById('admCheatGiveManual').addEventListener('click', ()=>{
+    S.hasManual = true; render(); populateAdminPanel(); toast("Đã nhận Đan Thư Nhập Môn!");
+  });
+  document.getElementById('admCheatGivePill').addEventListener('click', ()=>{
+    const q = PILL_QUALITY[PILL_QUALITY.length-1];
+    S.pills.push({id:"p"+Date.now()+Math.floor(Math.random()*999), name:q.name+" Vạn Năng Đan", effect:"tuvi", q});
+    render(); toast("Đã nhận Đan Hoàn Mỹ!");
+  });
+  document.getElementById('admCheatAllGongfa').addEventListener('click', ()=>{
+    S.ownedGongfa = GONGFA_LIST.map(g=>g.id); render(); populateAdminPanel(); toast("Đã học hết Công Pháp!");
+  });
+  document.getElementById('admCheatReset').addEventListener('click', resetGame);
+}
 
 boot();
 
