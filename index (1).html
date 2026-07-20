@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Siêu Tu Tiên Hệ Thống Mobile — Đại Phi Thăng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080a12;
+  --bg2:#10131f;
+  --panel:#141828d9;
+  --panel2:#1b2035;
+  --border:#4a3c1c;
+  --border-soft:#2c2814;
+  --gold:#d4af37;
+  --gold-hi:#f6de8a;
+  --accent:#2dd4a7;
+  --accent-dim:#1c8d6f;
+  --text:#e9e2c8;
+  --text-dim:#a89e82;
+  --danger:#e0453f;
+  --hp:#e0453f;
+  --bar-bg:#241d0f;
+  --shadow-gold: 0 0 8px rgba(212,175,55,.55);
+  --radius: 14px;
+}
+body.faction-ma{
+  --accent:#e0453f;
+  --accent-dim:#8f231f;
+}
+body.ascended{
+  --gold:#e9d9a8;
+  --gold-hi:#fff6d8;
+  --bg:#0a0b16;
+  --bg2:#14152a;
+  --border:#8f7a3a;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+html,body{height:100%;margin:0;padding:0;}
+body{
+  background: radial-gradient(ellipse at 50% -10%, #1b1f33 0%, var(--bg) 55%) fixed;
+  color:var(--text);
+  font-family:'Noto Serif SC', serif;
+  overflow:hidden;
+  position:fixed; inset:0;
+}
+.title-font{font-family:'Ma Shan Zheng', cursive; letter-spacing:1px;}
+#app{display:flex; flex-direction:column; height:100%; max-width:520px; margin:0 auto; position:relative; border-left:1px solid var(--border-soft); border-right:1px solid var(--border-soft);}
+
+/* ---------- HEADER ---------- */
+#header{
+  flex:0 0 auto;
+  background:linear-gradient(180deg,#171a2c 0%, #0e0f1a 100%);
+  border-bottom:2px solid var(--gold);
+  padding:8px 10px 6px;
+  z-index:20;
+}
+.hd-row1{display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;}
+.hd-name{font-family:'Ma Shan Zheng',cursive; font-size:20px; color:var(--gold-hi); text-shadow:var(--shadow-gold);}
+.hd-faction{font-size:11px; padding:2px 8px; border-radius:20px; border:1px solid var(--accent); color:var(--accent);}
+.hd-row2{display:flex; flex-wrap:wrap; gap:4px 10px; font-size:11px; color:var(--text-dim); margin-bottom:5px;}
+.hd-row2 b{color:var(--text);}
+.tuvi-wrap{margin-bottom:5px;}
+.tuvi-label{display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-dim); margin-bottom:2px;}
+.bar-outer{height:12px; border-radius:8px; background:var(--bar-bg); border:1px solid var(--border-soft); overflow:hidden; position:relative;}
+.bar-inner{height:100%; background:linear-gradient(90deg,var(--accent-dim),var(--accent)); transition:width .3s;}
+.bar-inner.hpbar{background:linear-gradient(90deg,#7a1512,var(--hp));}
+.hd-stats{display:flex; gap:8px; flex-wrap:wrap;}
+.stat-chip{flex:1 1 auto; min-width:74px; background:var(--panel2); border:1px solid var(--border-soft); border-radius:10px; padding:4px 7px; font-size:10.5px; text-align:center;}
+.stat-chip .v{color:var(--gold-hi); font-size:12px; font-weight:700; display:block;}
+.stat-chip .l{color:var(--text-dim); font-size:9.5px;}
+
+/* ---------- MAIN ---------- */
+#main{flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:12px 10px 90px; position:relative;}
+.tab-panel{display:none; animation:fadein .25s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.section-title{font-family:'Ma Shan Zheng',cursive; font-size:19px; color:var(--gold-hi); margin:4px 0 8px; text-shadow:var(--shadow-gold); display:flex; align-items:center; gap:6px;}
+.section-title::before,.section-title::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent);}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:12px;
+  margin-bottom:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+.card h3{margin:0 0 6px; font-size:14px; color:var(--gold);}
+.card p{margin:2px 0; font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+.card p b{color:var(--text);}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  min-height:48px; padding:0 16px; border-radius:12px;
+  border:1px solid var(--gold); background:linear-gradient(180deg,#2a2210,#171308);
+  color:var(--gold-hi); font-family:'Noto Serif SC',serif; font-weight:700; font-size:14px;
+  cursor:pointer; width:100%; margin-top:6px; transition:transform .08s, box-shadow .15s;
+  touch-action:manipulation;
+}
+.btn:active{transform:scale(.97);}
+.btn.primary{background:linear-gradient(180deg,var(--accent-dim),#0c2c22); border-color:var(--accent); color:#eafff6;}
+.btn.danger{background:linear-gradient(180deg,#5a1512,#200705); border-color:var(--danger); color:#ffe3e1;}
+.btn.ghost{background:transparent;}
+.btn.small{min-height:40px; font-size:12.5px; padding:0 10px;}
+.btn:disabled{opacity:.4; filter:grayscale(.4); cursor:not-allowed;}
+.btn-row{display:flex; gap:8px;}
+.btn-row .btn{margin-top:0;}
+
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.badge{display:inline-block; font-size:10.5px; padding:2px 7px; border-radius:20px; border:1px solid var(--border); color:var(--text-dim); margin-left:4px;}
+.badge.gold{border-color:var(--gold); color:var(--gold-hi);}
+.badge.rare{border-color:#a855f7; color:#d9b4ff;}
+.badge.myth{border-color:#ff8f2e; color:#ffd39b;}
+
+.log-item{font-size:12px; padding:6px 8px; border-bottom:1px dashed var(--border-soft); color:var(--text-dim);}
+.log-item .t{color:var(--gold); font-size:10.5px; margin-right:6px;}
+
+.item-row{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px; border:1px solid var(--border-soft); border-radius:10px; margin-bottom:6px; background:var(--panel2);}
+.item-row .info{flex:1;}
+.item-row .info .name{font-size:13px; color:var(--gold-hi); font-weight:700;}
+.item-row .info .desc{font-size:11px; color:var(--text-dim);}
+
+/* ---------- FOOTER ---------- */
+#footer{
+  position:absolute; left:0; right:0; bottom:0;
+  display:flex; z-index:30;
+  background:linear-gradient(0deg,#0c0d17 0%, #12142299 100%);
+  border-top:2px solid var(--gold);
+  backdrop-filter:blur(4px);
+}
+.nav-btn{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; padding:8px 2px 10px; min-height:58px; color:var(--text-dim);
+  font-size:10.5px; border:none; background:transparent; cursor:pointer;
+}
+.nav-btn .ic{font-size:20px; line-height:1;}
+.nav-btn.active{color:var(--gold-hi); text-shadow:var(--shadow-gold);}
+.nav-btn.active .ic{transform:translateY(-1px);}
+
+/* ---------- MODAL ---------- */
+.modal-overlay{
+  position:absolute; inset:0; background:rgba(4,5,10,.88); z-index:100;
+  display:flex; align-items:center; justify-content:center; padding:18px;
+  backdrop-filter:blur(2px);
+}
+.modal-overlay.hidden{display:none;}
+.modal-box{
+  width:100%; max-width:440px; max-height:88vh; overflow-y:auto;
+  background:linear-gradient(180deg,#171a2c,#0d0e18);
+  border:1.5px solid var(--gold); border-radius:16px; padding:18px;
+  box-shadow:0 0 30px rgba(212,175,55,.25);
+}
+.modal-box h2{font-family:'Ma Shan Zheng',cursive; color:var(--gold-hi); text-align:center; margin:0 0 12px; font-size:24px; text-shadow:var(--shadow-gold);}
+.choice-card{
+  border:1.5px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; cursor:pointer; background:var(--panel2);
+  transition:border-color .15s, box-shadow .15s;
+}
+.choice-card:active{border-color:var(--gold);}
+.choice-card h4{margin:0 0 4px; color:var(--gold); font-size:15px;}
+.choice-card p{margin:0; font-size:12px; color:var(--text-dim); line-height:1.5;}
+.linhcan-display{text-align:center; padding:16px 8px; border:1.5px dashed var(--border); border-radius:12px; margin-bottom:12px; background:var(--panel2);}
+.linhcan-display .name{font-family:'Ma Shan Zheng',cursive; font-size:26px; color:var(--gold-hi); text-shadow:var(--shadow-gold);}
+.linhcan-display .tier{margin-top:4px;}
+.linhcan-display .desc{font-size:12px; color:var(--text-dim); margin-top:6px;}
+
+/* tribulation */
+.trib-sky{position:relative; height:130px; border-radius:12px; margin-bottom:10px; overflow:hidden;
+  background:radial-gradient(ellipse at 50% 0%, #2b1650 0%, #0a0817 70%);
+  border:1px solid var(--border);}
+.trib-wave-dot{display:inline-block; width:16px; height:16px; border-radius:50%; margin:2px; background:var(--bar-bg); border:1px solid var(--border-soft);}
+.trib-wave-dot.done{background:var(--accent);}
+.trib-wave-dot.fail{background:var(--danger);}
+.trib-wave-dot.current{background:var(--gold); box-shadow:0 0 8px var(--gold);}
+.bolt{position:absolute; top:0; left:50%; width:4px; height:100%; background:linear-gradient(180deg,#fff,#f6de8a,transparent); opacity:0; transform:translateX(-50%);}
+.bolt.strike{animation:strike .35s ease-out;}
+@keyframes strike{0%{opacity:0;} 15%{opacity:1;} 40%{opacity:.3;} 100%{opacity:0;}}
+.flash{position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none;}
+.flash.on{animation:flashfx .3s ease-out;}
+@keyframes flashfx{0%{opacity:.85;} 100%{opacity:0;}}
+
+.ascend-overlay{
+  position:absolute; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at 50% 40%, #fff6d8 0%, #f0c419 25%, #4a3c10 75%, #05050a 100%);
+  animation:ascendfx 2.6s ease-in-out forwards;
+}
+.ascend-overlay span{font-family:'Ma Shan Zheng',cursive; font-size:34px; color:#3a2c05; text-shadow:0 0 18px #fff;}
+@keyframes ascendfx{0%{opacity:0;} 15%{opacity:1;} 80%{opacity:1;} 100%{opacity:0; visibility:hidden;}}
+
+.toast-wrap{position:absolute; top:70px; left:0; right:0; z-index:150; display:flex; flex-direction:column; align-items:center; gap:6px; pointer-events:none;}
+.toast{background:rgba(15,17,28,.95); border:1px solid var(--gold); color:var(--gold-hi); padding:6px 14px; border-radius:20px; font-size:12.5px; box-shadow:var(--shadow-gold); animation:toastfx 2.4s ease forwards;}
+@keyframes toastfx{0%{opacity:0; transform:translateY(-8px);} 12%{opacity:1; transform:translateY(0);} 82%{opacity:1;} 100%{opacity:0; transform:translateY(-6px);}}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+
+.small-note{font-size:11px; color:var(--text-dim); text-align:center; margin-top:4px;}
+.progress-mini{height:6px; border-radius:4px; background:var(--bar-bg); overflow:hidden; margin-top:4px;}
+.progress-mini i{display:block; height:100%; background:var(--accent);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ HEADER ============ -->
+  <div id="header">
+    <div class="hd-row1">
+      <div class="hd-name" id="hdName">Đạo Hữu</div>
+      <div class="hd-faction" id="hdFaction">—</div>
+    </div>
+    <div class="hd-row2">
+      <span>Linh Căn: <b id="hdLinhCan">—</b></span>
+      <span>Cảnh Giới: <b id="hdCanhGioi">—</b></span>
+      <span>Hồn Cảnh: <b id="hdHonCanh">Phàm Hồn</b></span>
+    </div>
+    <div class="tuvi-wrap">
+      <div class="tuvi-label"><span>Tu Vi</span><span id="tuviText">0 / 0</span></div>
+      <div class="bar-outer"><div class="bar-inner" id="tuviBar" style="width:0%"></div></div>
+    </div>
+    <div class="tuvi-wrap">
+      <div class="tuvi-label"><span>Sinh Lực</span><span id="hpText">0 / 0</span></div>
+      <div class="bar-outer"><div class="bar-inner hpbar" id="hpBar" style="width:100%"></div></div>
+    </div>
+    <div class="hd-stats">
+      <div class="stat-chip"><span class="v" id="hdLinhThach">0</span><span class="l">Linh Thạch</span></div>
+      <div class="stat-chip"><span class="v" id="hdTienTinh">0</span><span class="l">Tiên Tinh</span></div>
+      <div class="stat-chip"><span class="v" id="hdThoNguyen">100</span><span class="l">Thọ Nguyên (năm)</span></div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN TABS ============ -->
+  <div id="main">
+
+    <!-- TU LUYỆN -->
+    <div class="tab-panel active" id="tab-tuluyen">
+      <div class="section-title">Tu Luyện</div>
+      <div class="card" id="cultivateCard">
+        <h3 id="stageTitle">Luyện Khí Kỳ — Tầng 1</h3>
+        <p>Tốc độ tu luyện: <b id="cultSpeed">0</b> tu vi/giây</p>
+        <p>Yêu cầu đột phá: <b id="cultReq">0</b> tu vi</p>
+        <div class="progress-mini"><i id="stageProg" style="width:0%"></i></div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn primary" id="btnBreakthrough">Đột Phá</button>
+        </div>
+        <button class="btn danger" id="btnBurnLife" style="display:none;">🔥 Đốt Thọ Nguyên (x3 tốc độ, 30s)</button>
+      </div>
+
+      <div class="card">
+        <h3>Luân Hồi & Thần Lực</h3>
+        <p>Thần Lực tích lũy: <b id="divinePower">0</b>% tốc độ tu luyện vĩnh viễn</p>
+        <p class="small-note">Thọ Nguyên về 0 sẽ khiến bạn Luân Hồi Chuyển Thế — mất tiến độ hiện tại nhưng Thần Lực tích lũy vĩnh viễn không mất.</p>
+      </div>
+
+      <div class="card" id="tienChucCard" style="display:none;">
+        <h3>Tiên Chức: <span id="tienChucName">—</span></h3>
+        <p id="tienChucDesc"></p>
+      </div>
+    </div>
+
+    <!-- LỊCH LUYỆN -->
+    <div class="tab-panel" id="tab-lichluyen">
+      <div class="section-title">Lịch Luyện (Viễn Chinh)</div>
+      <div class="card">
+        <h3>Trạng thái viễn chinh</h3>
+        <p id="expeditionStatus">Chưa xuất chinh.</p>
+        <div class="progress-mini"><i id="expeditionProg" style="width:0%"></i></div>
+        <button class="btn primary" id="btnExpedition">Xuất Chinh (60s)</button>
+      </div>
+      <div class="card" id="petCard" style="display:none;">
+        <h3>Tiên Thú: <span id="petName">—</span></h3>
+        <p>Tự động nhặt Thảo Dược quý tộc mỗi 15 giây.</p>
+        <p>Thảo Dược đã nhặt: <b id="petHerbCount">0</b></p>
+      </div>
+      <div class="card">
+        <h3>Võ Kỹ đang trang bị</h3>
+        <p id="equippedSkill">Chưa có võ kỹ nào.</p>
+      </div>
+    </div>
+
+    <!-- TIÊN PHỦ / SHOP -->
+    <div class="tab-panel" id="tab-shop">
+      <div class="section-title">Tiên Phủ / Tông Môn</div>
+
+      <div class="card" id="tienChucChooseCard" style="display:none;">
+        <h3>Chọn Tiên Chức</h3>
+        <p class="small-note">Chỉ được chọn một lần sau khi Phi Thăng.</p>
+        <div id="tienChucChoices"></div>
+      </div>
+
+      <div class="card" id="linhDienCard" style="display:none;">
+        <h3>Tiên Phủ Linh Điền</h3>
+        <p>Tiên Thảo: <b id="linhDienStatus">Trống — chưa gieo trồng</b></p>
+        <div class="progress-mini"><i id="linhDienProg" style="width:0%"></i></div>
+        <button class="btn" id="btnPlant">Gieo Trồng Tiên Thảo</button>
+        <button class="btn primary" id="btnHarvest" style="display:none;">Thu Hoạch</button>
+      </div>
+
+      <div class="section-title">Cửa Hàng Công Pháp</div>
+      <div id="gongfaShop"></div>
+
+      <div class="section-title">Đan Thư</div>
+      <div class="card">
+        <h3>Đan Thư Nhập Môn</h3>
+        <p>Bắt buộc mua để mở khóa Luyện Đan.</p>
+        <button class="btn" id="btnBuyManual">Mua (200 Linh Thạch)</button>
+      </div>
+
+      <div class="section-title">Trọng Địa</div>
+      <div class="card">
+        <button class="btn danger" id="btnReset">Phản Phác Quy Chân (Reset Toàn Bộ)</button>
+      </div>
+    </div>
+
+    <!-- LUYỆN ĐAN -->
+    <div class="tab-panel" id="tab-luyendan">
+      <div class="section-title">Luyện Đan</div>
+      <div class="card">
+        <h3>Đan Sư: <span id="danSuRank">Đan Đồ</span></h3>
+        <p>Linh Hồn Cảnh Giới: <b id="honCanhRank">Phàm Hồn</b></p>
+        <p class="small-note">Cảnh giới linh hồn càng cao, tỷ lệ luyện ra Đan Dược phẩm chất cao càng lớn.</p>
+        <button class="btn primary" id="btnRefine">Luyện Đan (100 Linh Thạch)</button>
+        <p class="small-note" id="manualWarning">⚠️ Cần mua Đan Thư Nhập Môn ở Tiên Phủ/Shop trước.</p>
+      </div>
+      <div class="section-title">Túi Đan Dược</div>
+      <div id="pillInventory"><p class="small-note">Túi đồ trống.</p></div>
+    </div>
+
+    <!-- NHẬT KÝ -->
+    <div class="tab-panel" id="tab-nhatky">
+      <div class="section-title">Nhật Ký Tu Tiên</div>
+      <div id="logList"></div>
+    </div>
+
+  </div>
+
+  <!-- ============ FOOTER NAV ============ -->
+  <div id="footer">
+    <button class="nav-btn active" data-tab="tab-tuluyen"><span class="ic">☯</span>Tu Luyện</button>
+    <button class="nav-btn" data-tab="tab-lichluyen"><span class="ic">⚔</span>Lịch Luyện</button>
+    <button class="nav-btn" data-tab="tab-shop"><span class="ic">⛩</span>Tiên Phủ</button>
+    <button class="nav-btn" data-tab="tab-luyendan"><span class="ic">🜃</span>Luyện Đan</button>
+    <button class="nav-btn" data-tab="tab-nhatky"><span class="ic">簡</span>Nhật Ký</button>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <!-- ============ MODALS ============ -->
+  <div class="modal-overlay" id="modalFaction">
+    <div class="modal-box">
+      <h2>Chọn Trận Doanh</h2>
+      <div class="choice-card" data-faction="chinh">
+        <h4>⚖ Chính Đạo</h4>
+        <p>Tăng 5% tỷ lệ đột phá thành công. An toàn, ổn định, được thiên đạo bảo hộ.</p>
+      </div>
+      <div class="choice-card" data-faction="ma">
+        <h4>🩸 Ma Đạo</h4>
+        <p>Tăng 15% tốc độ tu luyện. Lôi Kiếp mạnh hơn 20%. Sở hữu bí thuật "Đốt Thọ Nguyên" (x3 tốc độ tu luyện 30 giây, tiêu hao thọ nguyên).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="modalLinhCan">
+    <div class="modal-box">
+      <h2>Đo Linh Căn</h2>
+      <div class="linhcan-display">
+        <div class="name" id="lcName">???</div>
+        <div class="tier" id="lcTier"></div>
+        <div class="desc" id="lcDesc">Nhấn "Tái Sinh" để đo thử Linh Căn của bạn.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btnReroll">🎲 Tái Sinh</button>
+        <button class="btn primary" id="btnConfirmLC" disabled>Xác Nhận Nhập Đạo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="modalTribulation">
+    <div class="modal-box">
+      <h2 id="tribTitle">⚡ Phi Thăng Thiên Kiếp ⚡</h2>
+      <p class="small-note" style="margin-bottom:8px;">Chống chịu 9 đợt Lôi Kiếp để Phi Thăng Tiên Giới. Dùng Tiên Đan để phòng ngự khi nguy cấp.</p>
+      <div class="trib-sky" id="tribSky">
+        <div class="flash" id="tribFlash"></div>
+        <div class="bolt" id="tribBolt"></div>
+      </div>
+      <div style="text-align:center; margin-bottom:8px;" id="tribDots"></div>
+      <div class="tuvi-wrap">
+        <div class="tuvi-label"><span>Sinh Lực Kiếp Nạn</span><span id="tribHpText"></span></div>
+        <div class="bar-outer"><div class="bar-inner hpbar" id="tribHpBar" style="width:100%"></div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="btnTribStrike">Chống Đỡ Lôi Kiếp</button>
+        <button class="btn" id="btnTribPill">Dùng Tiên Đan</button>
+      </div>
+      <button class="btn ghost small" id="btnTribClose" style="display:none;">Đóng</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="ascendOverlay" style="z-index:300;"></div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================================================================
+   DATA
+=================================================================== */
+const PHAM_REALMS = ["Luyện Khí","Trúc Cơ","Kim Đan","Nguyên Anh","Hóa Thần","Luyện Hư","Hợp Thể","Đại Thừa","Độ Kiếp"];
+const TIEN_REALMS = ["Chân Tiên","Kim Tiên","Thái Ất Ngọc Tiên","Đại La Kim Tiên","Đạo Tổ"];
+const TANG_HAN = ["Nhất","Nhị","Tam","Tứ","Ngũ","Lục","Thất","Bát","Cửu"];
+
+const NGU_HANH = ["Kim","Mộc","Thủy","Hỏa","Thổ"];
+
+const HON_CANH = ["Phàm Hồn","Linh Hồn","Đế Hồn","Thần Hồn Cảnh"];
+const DAN_SU_RANK = ["Đan Đồ","Nhị Phẩm Đan Sư","Tứ Phẩm Đan Sư","Lục Phẩm Đan Sư","Cửu Phẩm Đan Sư","Tiên Đan Sư"];
+const PILL_QUALITY = [
+  {name:"Hạ Phẩm", mult:1, badge:""},
+  {name:"Trung Phẩm", mult:1.5, badge:"gold"},
+  {name:"Thượng Phẩm", mult:2.2, badge:"gold"},
+  {name:"Cực Phẩm", mult:3.2, badge:"rare"},
+  {name:"Hoàn Mỹ (Đan Văn)", mult:5, badge:"myth"}
+];
+
+const GONGFA_TIERS = ["Hoàng Cấp","Huyền Cấp","Địa Cấp","Thiên Cấp","Tiên Cấp","Thần Cấp","Đạo Cấp"];
+const GONGFA_LIST = GONGFA_TIERS.map((tier,i)=>({
+  id:"gf"+i, tier, name: tier.replace(" Cấp","")+" Tâm Pháp",
+  cost: Math.round(150*Math.pow(3.1,i)),
+  bonus: +(0.06*(i+1)).toFixed(2), // +% cultivation speed
+  needImmortal: i>=4
+}));
+
+const TIEN_CHUC = [
+  {id:"kiem", name:"Kiếm Tiên", desc:"Tăng 30% lực chiến đấu khi Lịch Luyện ở Tiên Giới."},
+  {id:"tran", name:"Trận Pháp Sư", desc:"Giảm 20% sát thương từ Lôi Kiếp ở Tiên Giới."},
+  {id:"ngu", name:"Ngự Thú Sư", desc:"Nuôi Tiên Thú (Long, Phượng, Kỳ Lân) tự động nhặt Thảo Dược quý tộc mỗi 15 giây."}
+];
+const TIEN_THU_NAMES = ["Thanh Long Ấu Long","Chu Tước Huyễn Vũ","Kỳ Lân Tiểu Thú"];
+
+/* Thọ Nguyên (lifespan) ranges per realm, theo đúng lore tu tiên.
+   pham: [min,max] tại tầng 1 -> tầng 9 (nội suy tuyến tính giữa 2 mốc)
+   tien: trường sinh bất lão nhưng vẫn phải qua Thiên Nhân Ngũ Suy nên vẫn có mốc rất lớn */
+const PHAM_LIFESPAN = [
+  [100,150],      // Luyện Khí
+  [200,300],      // Trúc Cơ
+  [500,600],      // Kim Đan
+  [1000,2000],    // Nguyên Anh
+  [3000,5000],    // Hóa Thần
+  [8000,15000],   // Luyện Hư
+  [15000,30000],  // Hợp Thể
+  [30000,60000],  // Đại Thừa
+  [60000,100000]  // Độ Kiếp
+];
+const TIEN_LIFESPAN = [
+  [100000,300000],      // Chân Tiên
+  [300000,800000],      // Kim Tiên
+  [800000,2000000],     // Thái Ất Ngọc Tiên
+  [2000000,5000000],    // Đại La Kim Tiên
+  [5000000,10000000]    // Đạo Tổ
+];
+function lifespanMaxFor(realmSet, realmIdx, tang){
+  const table = realmSet==="pham" ? PHAM_LIFESPAN : TIEN_LIFESPAN;
+  const [mn,mx] = table[realmIdx];
+  return Math.round(mn + (mx-mn) * ((tang-1)/8));
+}
+
+/* Linh Căn gacha table */
+function rollLinhCan(faction){
+  const r = Math.random()*100;
+  let pool, category;
+  if(r < 75){ category = "nguhanh"; }
+  else if(r < 95){ category = "di"; }
+  else if(r < 99.9){ category = "bientai"; }
+  else { category = "than"; }
+
+  if(category === "nguhanh"){
+    const r2 = Math.random();
+    let heCount, tierName, mult;
+    if(r2 < 0.06){ heCount=1; tierName="Thiên Linh Căn"; mult=2.0; }
+    else if(r2 < 0.26){ heCount=2; tierName="Chân Linh Căn"; mult=1.5; }
+    else if(r2 < 0.62){ heCount=3; tierName="Tam Linh Căn"; mult=1.0; }
+    else { heCount = 4 + Math.round(Math.random()); tierName="Ngụy Linh Căn"; mult=0.5; }
+    const hesys = [...NGU_HANH].sort(()=>Math.random()-0.5).slice(0,heCount);
+    return {
+      category, tierName, mult,
+      name: tierName+" ("+hesys.join("")+")",
+      desc: heCount+" hệ Ngũ Hành: "+hesys.join(", ")+". Hệ số tu luyện x"+mult+".",
+      badge: mult>=2?"myth":(mult>=1.5?"rare":(mult>=1?"gold":""))
+    };
+  }
+  if(category === "di"){
+    const opts = ["Lôi Linh Căn","Băng Linh Căn","Phong Linh Căn"];
+    if(faction === "ma") opts.push("Độc Linh Căn","Cốt Linh Căn","Huyết Linh Căn");
+    const pick = opts[Math.floor(Math.random()*opts.length)];
+    let desc = "Dị Linh Căn hiếm có. Hệ số tu luyện x1.3.";
+    if(pick==="Lôi Linh Căn") desc = "Giảm 15% sát thương Lôi Kiếp khi Đột Phá / Phi Thăng. Hệ số tu luyện x1.3.";
+    if(["Độc Linh Căn","Cốt Linh Căn","Huyết Linh Căn"].includes(pick)) desc = "Linh căn Ma Đạo: cơ chế hút máu khi chiến đấu. Hệ số tu luyện x1.3.";
+    return {category, tierName:"Dị Linh Căn", mult:1.3, name:pick, desc, badge:"rare", special: pick.startsWith("Lôi")?"loi":(["Độc Linh Căn","Cốt Linh Căn","Huyết Linh Căn"].includes(pick)?"hutmau":null)};
+  }
+  if(category === "bientai"){
+    const opts = ["Không Gian Linh Căn","Thời Gian Linh Căn","Âm Linh Căn","Dương Linh Căn","Quang Linh Căn","Ám Linh Căn"];
+    const pick = opts[Math.floor(Math.random()*opts.length)];
+    return {category, tierName:"Biến Thái Linh Căn", mult:1.8, name:pick, desc:"Kích hoạt hiệu ứng phụ ngẫu nhiên khi Lịch Luyện. Hệ số tu luyện x1.8.", badge:"myth", special:"bientai"};
+  }
+  // than
+  const opts = [
+    {name:"Ngũ Hành Hỗn Nguyên Thể", desc:"Pháp lực x5, vạn pháp bất xâm. Hệ số tu luyện x5.", mult:5},
+    {name:"Vạn Vật Linh Căn", desc:"Thiên đạo sủng nhi. Hệ số tu luyện x5.", mult:5}
+  ];
+  const pick = opts[Math.floor(Math.random()*opts.length)];
+  return {category:"than", tierName:"Thánh/Thần Linh Căn", mult:pick.mult, name:pick.name, desc:pick.desc, badge:"myth"};
+}
+
+/* ===================================================================
+   STATE
+=================================================================== */
+const DEFAULT_STATE = () => ({
+  started:false,
+  name:"Đạo Hữu",
+  faction:null, // 'chinh' | 'ma'
+  linhCan:null,
+  divinePowerPct:0, // permanent, survives reset via reincarnation
+
+  realmSet:"pham", // 'pham' | 'tien'
+  realmIdx:0,
+  tang:1,
+
+  tuVi:0,
+  linhThach:150,
+  tienTinh:0,
+  thoNguyen:100,
+  thoNguyenMax:100, // Luyện Khí Tầng 1: mốc khởi điểm 100 năm
+  hp:100, hpMax:100,
+
+  isImmortal:false,
+  tienChuc:null,
+
+  burnActive:false, burnEnd:0,
+  lifespanTimer:0,
+
+  ownedGongfa:[],
+  hasManual:false,
+
+  danSuExp:0, // pills refined count
+  honCanhIdx:0,
+  pills:[], // {id,name,quality,effect}
+
+  expeditionActive:false, expeditionEnd:0, expeditionTotal:60,
+  petHerbCount:0, petTimer:0,
+
+  linhDienState:"empty", // empty | growing | ready
+  linhDienEnd:0, linhDienTotal:40,
+
+  log:[],
+  lastTick:Date.now(),
+  lastSave:Date.now()
+});
+
+let S = null;
+let tempLinhCan = null;
+let tempFaction = null;
+
+/* ===================================================================
+   UTILS
+=================================================================== */
+function fmt(n){
+  n = Math.floor(n);
+  if(n >= 1e12) return (n/1e12).toFixed(2)+"T";
+  if(n >= 1e9) return (n/1e9).toFixed(2)+"B";
+  if(n >= 1e6) return (n/1e6).toFixed(2)+"M";
+  if(n >= 1e4) return (n/1e3).toFixed(1)+"K";
+  return n.toLocaleString('vi-VN');
+}
+function toast(msg){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className='toast'; el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(), 2500);
+}
+function log(msg){
+  S.log.unshift({t:new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}), m:msg});
+  if(S.log.length>150) S.log.length=150;
+  renderLog();
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+/* ===================================================================
+   DERIVED / FORMULAS
+=================================================================== */
+function globalStageIndex(){
+  // flat progression index across pham(9*9) then tien(5*9)
+  if(S.realmSet==="pham") return S.realmIdx*9 + (S.tang-1);
+  return 81 + S.realmIdx*9 + (S.tang-1);
+}
+function tuViMax(){
+  const idx = globalStageIndex();
+  const base = S.realmSet==="pham" ? 60 : 200000;
+  return Math.round(base * Math.pow(1.32, idx));
+}
+function gongfaSpeedBonus(){
+  return S.ownedGongfa.reduce((sum,id)=>{
+    const g = GONGFA_LIST.find(x=>x.id===id);
+    return sum + (g? g.bonus : 0);
+  },0);
+}
+function cultivationSpeed(){
+  let base = 1.0;
+  const lcMult = S.linhCan ? S.linhCan.mult : 1;
+  base *= lcMult;
+  base *= (1 + S.divinePowerPct/100);
+  base *= (1 + gongfaSpeedBonus());
+  if(S.faction==="ma") base *= 1.15;
+  if(S.tienChuc==="kiem" && S.realmSet==="tien") base *= 1.10;
+  if(S.burnActive) base *= 3;
+  return base;
+}
+function currentRealmName(){
+  return S.realmSet==="pham" ? PHAM_REALMS[S.realmIdx] : TIEN_REALMS[S.realmIdx];
+}
+function stageLabel(){
+  return currentRealmName()+" Kỳ — Tầng "+TANG_HAN[S.tang-1];
+}
+function isMaxPhamStage(){
+  return S.realmSet==="pham" && S.realmIdx===PHAM_REALMS.length-1 && S.tang===9;
+}
+function isMaxTienStage(){
+  return S.realmSet==="tien" && S.realmIdx===TIEN_REALMS.length-1 && S.tang===9;
+}
+
+/* ===================================================================
+   CORE GAME LOOP
+=================================================================== */
+function tick(){
+  const now = Date.now();
+  const dt = Math.min(3, (now - S.lastTick)/1000); // seconds, cap to avoid huge jumps
+  S.lastTick = now;
+  if(!S.started){ return; }
+
+  // burn check
+  if(S.burnActive && now > S.burnEnd) S.burnActive = false;
+
+  // cultivation
+  if(!(isMaxPhamStage() || isMaxTienStage())){
+    S.tuVi += cultivationSpeed() * dt * 8;
+  } else {
+    // still trickle a tiny amount so bar shows full & user notices breakthrough is ready
+  }
+  S.tuVi = Math.min(S.tuVi, tuViMax());
+
+  // passive currency trickle
+  S.linhThach += dt * (2 + globalStageIndex()*0.4);
+  if(S.isImmortal) S.tienTinh += dt*0.02;
+
+  // lifespan
+  S.lifespanTimer += dt*1000;
+  if(S.lifespanTimer >= 30000){
+    S.lifespanTimer -= 30000;
+    S.thoNguyen -= 1;
+    if(S.thoNguyen <= 0){
+      reincarnate();
+    }
+  }
+
+  // expedition
+  if(S.expeditionActive && now >= S.expeditionEnd){
+    finishExpedition();
+  }
+
+  // pet auto pickup
+  if(S.tienChuc==="ngu"){
+    S.petTimer += dt*1000;
+    if(S.petTimer >= 15000){
+      S.petTimer -= 15000;
+      S.petHerbCount += 1;
+      S.linhThach += 15;
+    }
+  }
+
+  // linh dien growth
+  if(S.linhDienState==="growing" && now >= S.linhDienEnd){
+    S.linhDienState = "ready";
+  }
+
+  render();
+}
+
+function reincarnate(){
+  const bonus = 10;
+  S.divinePowerPct += bonus;
+  log("☯ Thọ Nguyên cạn kiệt! Bạn đã Luân Hồi Chuyển Thế. Thần Lực vĩnh viễn +"+bonus+"%.");
+  toast("Luân Hồi Chuyển Thế! Thần Lực +"+bonus+"%");
+  const keepDivine = S.divinePowerPct;
+  const keepFaction = S.faction;
+  const keepLC = S.linhCan;
+  const keepName = S.name;
+  S = DEFAULT_STATE();
+  S.started = true;
+  S.divinePowerPct = keepDivine;
+  S.faction = keepFaction;
+  S.linhCan = keepLC;
+  S.name = keepName;
+  saveGame();
+}
+
+/* ===================================================================
+   BREAKTHROUGH / ASCENSION
+=================================================================== */
+function canBreakthrough(){
+  return S.tuVi >= tuViMax();
+}
+function doBreakthrough(){
+  if(!canBreakthrough()) return;
+
+  if(isMaxPhamStage()){
+    // trigger ascension tribulation instead
+    openTribulation();
+    return;
+  }
+  if(isMaxTienStage()){
+    toast("Bạn đã đạt cảnh giới tối cao hiện tại: "+currentRealmName()+" Cửu Trọng Thiên!");
+    return;
+  }
+
+  let successChance = 0.97;
+  if(S.faction==="chinh") successChance += 0.05;
+  successChance = clamp(successChance,0,0.995);
+
+  const success = Math.random() < successChance;
+  if(success){
+    S.tuVi = 0;
+    S.tang += 1;
+    if(S.tang > 9){
+      S.tang = 1;
+      S.realmIdx += 1;
+    }
+    const oldMax = S.thoNguyenMax;
+    const newMax = lifespanMaxFor(S.realmSet, S.realmIdx, S.tang);
+    const lifespanGain = Math.max(0, newMax - oldMax);
+    S.thoNguyenMax = newMax;
+    S.thoNguyen += lifespanGain;
+    S.hpMax += S.realmSet==="pham"?12:60;
+    S.hp = S.hpMax;
+    log("⚡ Đột phá thành công! Hiện tại: "+stageLabel()+". Thọ Nguyên tối đa nay là "+fmt(newMax)+" năm (+"+fmt(lifespanGain)+").");
+    toast("Đột Phá Thành Công! "+stageLabel());
+  } else {
+    S.tuVi = Math.floor(tuViMax()*0.4);
+    log("💥 Đột phá thất bại! Tu vi tổn thất, cần tích lũy lại.");
+    toast("Đột Phá Thất Bại!");
+  }
+  render();
+}
+
+/* --- Tribulation (Ascension) --- */
+let tribState = null;
+function openTribulation(){
+  tribState = {
+    wave:0, maxWave:9,
+    hp:100, hpMax:100,
+    finished:false
+  };
+  document.getElementById('modalTribulation').classList.remove('hidden');
+  renderTribulation();
+}
+function tribDamage(){
+  let dmg = 9 + Math.random()*7; // base 9-16 per wave
+  dmg *= (1 + tribState.wave*0.12);
+  if(S.faction==="ma") dmg *= 1.20;
+  if(S.linhCan && S.linhCan.special==="loi") dmg *= 0.85;
+  if(S.tienChuc==="tran") dmg *= 0.80;
+  return dmg;
+}
+function tribStrike(){
+  if(tribState.finished) return;
+  const dmg = tribDamage();
+  tribState.hp -= dmg;
+  const bolt = document.getElementById('tribBolt');
+  const flash = document.getElementById('tribFlash');
+  bolt.classList.remove('strike'); void bolt.offsetWidth; bolt.classList.add('strike');
+  flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+
+  if(tribState.hp <= 0){
+    tribState.hp = 0;
+    tribFail();
+    return;
+  }
+  tribState.wave += 1;
+  if(tribState.wave >= tribState.maxWave){
+    tribSuccess();
+    return;
+  }
+  renderTribulation();
+}
+function tribUsePill(){
+  const idx = S.pills.findIndex(p=>p.effect==="heal" || p.effect==="tuvi");
+  const healPill = S.pills.find(p=>p.effect==="heal");
+  if(!healPill){
+    toast("Không có Tiên Đan phòng ngự trong túi!");
+    return;
+  }
+  S.pills.splice(S.pills.indexOf(healPill),1);
+  tribState.hp = Math.min(tribState.hpMax, tribState.hp + 35*healPill.q.mult);
+  toast("Đã dùng "+healPill.name+" để hồi Sinh Lực Kiếp Nạn!");
+  renderPills();
+  renderTribulation();
+}
+function tribSuccess(){
+  tribState.finished = true;
+  document.getElementById('modalTribulation').classList.add('hidden');
+  S.isImmortal = true;
+  S.realmSet = "tien";
+  S.realmIdx = 0;
+  S.tang = 1;
+  S.tuVi = 0;
+  S.tienTinh += Math.floor(S.linhThach/10000);
+  S.linhThach = S.linhThach % 10000;
+  const newMax = lifespanMaxFor("tien", 0, 1);
+  S.thoNguyenMax = newMax;
+  S.thoNguyen = newMax;
+  document.body.classList.add('ascended');
+  log("🌟 PHI THĂNG THÀNH CÔNG! Bạn đã bước vào Tiên Giới, trở thành "+TIEN_REALMS[0]+"!");
+  log("✨ Từ nay trường sinh bất lão (Thọ Nguyên "+fmt(newMax)+" năm), nhưng vẫn phải cẩn trọng Thiên Nhân Ngũ Suy mỗi khi đột phá đại cảnh giới.");
+  playAscendFX();
+  setTimeout(()=>{
+    render();
+    if(!S.tienChuc){
+      switchTab('tab-shop');
+      toast("Hãy chọn Tiên Chức của bạn tại Tiên Phủ!");
+    }
+  }, 2700);
+}
+function tribFail(){
+  tribState.finished = true;
+  log("💀 Phi Thăng thất bại! Tổn hại nghiêm trọng Linh Hồn, rơi về Đại Thừa Kỳ Tầng 1.");
+  toast("Phi Thăng Thất Bại! Rơi về Đại Thừa Kỳ.");
+  S.realmIdx = PHAM_REALMS.indexOf("Đại Thừa");
+  S.tang = 1;
+  S.tuVi = 0;
+  S.thoNguyenMax = lifespanMaxFor("pham", S.realmIdx, S.tang);
+  S.thoNguyen = Math.min(S.thoNguyen, S.thoNguyenMax);
+  S.honCanhIdx = Math.max(0, S.honCanhIdx-1);
+  renderTribulation();
+  document.getElementById('btnTribClose').style.display='block';
+  document.getElementById('btnTribStrike').disabled = true;
+  document.getElementById('btnTribPill').disabled = true;
+}
+function renderTribulation(){
+  document.getElementById('tribHpText').textContent = Math.ceil(tribState.hp)+" / "+tribState.hpMax;
+  document.getElementById('tribHpBar').style.width = clamp(tribState.hp/tribState.hpMax*100,0,100)+"%";
+  const dotsWrap = document.getElementById('tribDots');
+  dotsWrap.innerHTML = "";
+  for(let i=0;i<tribState.maxWave;i++){
+    const d = document.createElement('span');
+    d.className = "trib-wave-dot" + (i<tribState.wave? " done":"") + (i===tribState.wave && !tribState.finished? " current":"");
+    dotsWrap.appendChild(d);
+  }
+}
+function playAscendFX(){
+  const ov = document.getElementById('ascendOverlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML = '<span>飛 昇 仙 界</span>';
+  setTimeout(()=>ov.classList.add('hidden'), 2650);
+}
+
+/* ===================================================================
+   BURN LIFESPAN (MA DAO)
+=================================================================== */
+function burnLifespan(){
+  if(S.faction!=="ma") return;
+  if(S.thoNguyen <= 1){ toast("Thọ Nguyên quá thấp, không thể Đốt Thọ Nguyên!"); return; }
+  S.burnActive = true;
+  S.burnEnd = Date.now()+30000;
+  S.thoNguyen -= 1;
+  log("🔥 Đốt Thọ Nguyên! Tốc độ tu luyện x3 trong 30 giây.");
+  toast("Đốt Thọ Nguyên kích hoạt! x3 tốc độ 30s");
+}
+
+/* ===================================================================
+   EXPEDITION
+=================================================================== */
+function startExpedition(){
+  if(S.expeditionActive) return;
+  S.expeditionActive = true;
+  S.expeditionTotal = 60;
+  S.expeditionEnd = Date.now()+S.expeditionTotal*1000;
+  log("⚔ Xuất chinh Lịch Luyện...");
+}
+function finishExpedition(){
+  S.expeditionActive = false;
+  let reward = 80 + globalStageIndex()*10;
+  if(S.tienChuc==="kiem" && S.realmSet==="tien") reward *= 1.3;
+  S.linhThach += reward;
+  const tuviGain = 20 + globalStageIndex()*3;
+  S.tuVi = Math.min(tuViMax(), S.tuVi+tuviGain);
+  log("🏆 Lịch Luyện hoàn thành! Nhận "+fmt(reward)+" Linh Thạch và "+fmt(tuviGain)+" tu vi.");
+  toast("Lịch Luyện hoàn thành! +"+fmt(reward)+" Linh Thạch");
+}
+
+/* ===================================================================
+   GONGFA SHOP
+=================================================================== */
+function buyGongfa(id){
+  const g = GONGFA_LIST.find(x=>x.id===id);
+  if(!g) return;
+  if(S.ownedGongfa.includes(id)){ toast("Đã sở hữu công pháp này."); return; }
+  if(g.needImmortal && !S.isImmortal){ toast("Cần Phi Thăng Tiên Giới mới học được công pháp này."); return; }
+  const currency = g.needImmortal ? 'tienTinh' : 'linhThach';
+  const cost = g.needImmortal ? Math.ceil(g.cost/500) : g.cost;
+  if(S[currency] < cost){ toast("Không đủ "+(currency==='tienTinh'?'Tiên Tinh':'Linh Thạch')+"!"); return; }
+  S[currency] -= cost;
+  S.ownedGongfa.push(id);
+  log("📖 Lĩnh ngộ "+g.name+" ("+g.tier+"). Tốc độ tu luyện +"+Math.round(g.bonus*100)+"%.");
+  toast("Đã học "+g.name+"!");
+  render();
+}
+function buyManual(){
+  if(S.hasManual){ toast("Đã sở hữu Đan Thư Nhập Môn."); return; }
+  if(S.linhThach < 200){ toast("Không đủ Linh Thạch!"); return; }
+  S.linhThach -= 200;
+  S.hasManual = true;
+  log("📗 Mua thành công Đan Thư Nhập Môn. Có thể Luyện Đan.");
+  toast("Đã mở khóa Luyện Đan!");
+  render();
+}
+
+/* ===================================================================
+   ALCHEMY
+=================================================================== */
+function danSuRankIdx(){
+  return clamp(Math.floor(S.danSuExp/8), 0, DAN_SU_RANK.length-1);
+}
+function refinePill(){
+  if(!S.hasManual){ toast("Cần mua Đan Thư Nhập Môn trước!"); return; }
+  if(S.linhThach < 100){ toast("Không đủ Linh Thạch!"); return; }
+  S.linhThach -= 100;
+  S.danSuExp += 1;
+  if(S.danSuExp % 10 === 0) S.honCanhIdx = clamp(S.honCanhIdx+1,0,HON_CANH.length-1);
+
+  // weighted quality by honCanhIdx
+  const weights = [
+    [55,30,12,2.5,0.5],
+    [35,35,20,8,2],
+    [18,30,30,17,5],
+    [8,20,30,28,14]
+  ][S.honCanhIdx];
+  const r = Math.random()*100;
+  let acc=0, qIdx=0;
+  for(let i=0;i<weights.length;i++){ acc+=weights[i]; if(r<=acc){qIdx=i;break;} }
+  const q = PILL_QUALITY[qIdx];
+  const effects = ["tuvi","heal","lifespan"];
+  const effect = effects[Math.floor(Math.random()*effects.length)];
+  const effNameMap = {tuvi:"Tụ Linh Đan", heal:"Hộ Thể Tiên Đan", lifespan:"Trường Sinh Đan"};
+  const pill = {
+    id:"p"+Date.now()+Math.floor(Math.random()*999),
+    name: q.name+" "+effNameMap[effect],
+    effect, q
+  };
+  S.pills.push(pill);
+  log("🜃 Luyện thành "+pill.name+"! (Đan Sư: "+DAN_SU_RANK[danSuRankIdx()]+")");
+  toast("Luyện thành "+pill.name+"!");
+  render();
+}
+function usePill(id){
+  const idx = S.pills.findIndex(p=>p.id===id);
+  if(idx<0) return;
+  const pill = S.pills[idx];
+  S.pills.splice(idx,1);
+  if(pill.effect==="tuvi"){
+    const gain = 300*pill.q.mult*(1+globalStageIndex()*0.1);
+    S.tuVi = Math.min(tuViMax(), S.tuVi+gain);
+    toast("Tu vi +"+fmt(gain));
+  } else if(pill.effect==="heal"){
+    S.hp = S.hpMax;
+    toast("Sinh lực hồi phục hoàn toàn!");
+  } else if(pill.effect==="lifespan"){
+    const gain = Math.ceil(3*pill.q.mult);
+    S.thoNguyen = Math.min(S.thoNguyenMax+gain, S.thoNguyen+gain);
+    toast("Thọ Nguyên +"+gain+" năm!");
+  }
+  log("Sử dụng "+pill.name+".");
+  render();
+}
+
+/* ===================================================================
+   LINH DIEN
+=================================================================== */
+function plantLinhDien(){
+  if(S.linhDienState!=="empty") return;
+  S.linhDienState = "growing";
+  S.linhDienTotal = 40;
+  S.linhDienEnd = Date.now()+S.linhDienTotal*1000;
+  log("🌱 Gieo trồng Tiên Thảo tại Linh Điền.");
+}
+function harvestLinhDien(){
+  if(S.linhDienState!=="ready") return;
+  S.linhDienState = "empty";
+  S.linhThach += 500;
+  log("🌾 Thu hoạch Tiên Thảo tại Linh Điền! Nhận nguyên liệu luyện đan quý giá.");
+  toast("Thu hoạch thành công! +500 Linh Thạch nguyên liệu");
+  render();
+}
+
+/* ===================================================================
+   TIEN CHUC SELECTION
+=================================================================== */
+function chooseTienChuc(id){
+  if(S.tienChuc) return;
+  S.tienChuc = id;
+  const tc = TIEN_CHUC.find(x=>x.id===id);
+  log("🏯 Bạn đã tựu nhậm Tiên Chức: "+tc.name+"!");
+  toast("Tiên Chức: "+tc.name);
+  render();
+}
+
+/* ===================================================================
+   RENDER
+=================================================================== */
+function render(){
+  if(!S.started) return;
+  document.getElementById('hdName').textContent = S.name;
+  const factionLabel = S.faction==="ma"?"Ma Đạo":"Chính Đạo";
+  document.getElementById('hdFaction').textContent = factionLabel;
+  document.getElementById('hdLinhCan').textContent = S.linhCan ? S.linhCan.name : "—";
+  document.getElementById('hdCanhGioi').textContent = stageLabel();
+  document.getElementById('hdHonCanh').textContent = HON_CANH[S.honCanhIdx];
+
+  document.getElementById('tuviText').textContent = fmt(S.tuVi)+" / "+fmt(tuViMax());
+  document.getElementById('tuviBar').style.width = clamp(S.tuVi/tuViMax()*100,0,100)+"%";
+
+  document.getElementById('hpText').textContent = Math.ceil(S.hp)+" / "+S.hpMax;
+  document.getElementById('hpBar').style.width = clamp(S.hp/S.hpMax*100,0,100)+"%";
+
+  document.getElementById('hdLinhThach').textContent = fmt(S.linhThach);
+  document.getElementById('hdTienTinh').textContent = fmt(S.tienTinh);
+  document.getElementById('hdThoNguyen').textContent = Math.max(0,Math.floor(S.thoNguyen))+" / "+S.thoNguyenMax;
+
+  // cultivate card
+  document.getElementById('stageTitle').textContent = stageLabel()+(S.realmSet==='tien'?' 【Tiên Giới】':'');
+  document.getElementById('cultSpeed').textContent = (cultivationSpeed()*8).toFixed(1);
+  document.getElementById('cultReq').textContent = fmt(tuViMax());
+  document.getElementById('stageProg').style.width = clamp(S.tuVi/tuViMax()*100,0,100)+"%";
+
+  const btnBt = document.getElementById('btnBreakthrough');
+  if(isMaxPhamStage()){
+    btnBt.textContent = canBreakthrough() ? "⚡ PHI THĂNG THIÊN KIẾP ⚡" : "Đột Phá (chưa đủ tu vi)";
+    btnBt.disabled = !canBreakthrough();
+  } else if(isMaxTienStage()){
+    btnBt.textContent = "Đã Đạt Đỉnh Phong "+currentRealmName();
+    btnBt.disabled = true;
+  } else {
+    btnBt.textContent = "Đột Phá";
+    btnBt.disabled = !canBreakthrough();
+  }
+
+  document.getElementById('btnBurnLife').style.display = S.faction==="ma" ? "flex":"none";
+  document.getElementById('btnBurnLife').disabled = S.burnActive;
+  document.getElementById('divinePower').textContent = S.divinePowerPct.toFixed(0);
+
+  document.getElementById('tienChucCard').style.display = S.tienChuc ? "block":"none";
+  if(S.tienChuc){
+    const tc = TIEN_CHUC.find(x=>x.id===S.tienChuc);
+    document.getElementById('tienChucName').textContent = tc.name;
+    document.getElementById('tienChucDesc').textContent = tc.desc;
+  }
+
+  // expedition
+  document.getElementById('btnExpedition').disabled = S.expeditionActive;
+  if(S.expeditionActive){
+    const remain = Math.max(0, S.expeditionEnd-Date.now());
+    const pct = 100-(remain/(S.expeditionTotal*1000)*100);
+    document.getElementById('expeditionStatus').textContent = "Đang viễn chinh... còn "+Math.ceil(remain/1000)+" giây.";
+    document.getElementById('expeditionProg').style.width = clamp(pct,0,100)+"%";
+  } else {
+    document.getElementById('expeditionStatus').textContent = "Sẵn sàng xuất chinh.";
+    document.getElementById('expeditionProg').style.width = "0%";
+  }
+  document.getElementById('petCard').style.display = S.tienChuc==="ngu" ? "block":"none";
+  if(S.tienChuc==="ngu"){
+    document.getElementById('petName').textContent = TIEN_THU_NAMES[0];
+    document.getElementById('petHerbCount').textContent = S.petHerbCount;
+  }
+  const skillOwned = S.ownedGongfa.length? GONGFA_LIST.find(g=>g.id===S.ownedGongfa[S.ownedGongfa.length-1]).name : null;
+  document.getElementById('equippedSkill').textContent = skillOwned ? skillOwned+" đang phát huy tác dụng." : "Chưa có võ kỹ nào.";
+
+  // tien phu / shop
+  document.getElementById('tienChucChooseCard').style.display = (S.isImmortal && !S.tienChuc) ? "block":"none";
+  if(S.isImmortal && !S.tienChuc){
+    const wrap = document.getElementById('tienChucChoices');
+    if(!wrap.dataset.built){
+      wrap.innerHTML = TIEN_CHUC.map(tc=>
+        `<div class="choice-card" data-tc="${tc.id}"><h4>${tc.name}</h4><p>${tc.desc}</p></div>`
+      ).join("");
+      wrap.querySelectorAll('.choice-card').forEach(c=>{
+        c.addEventListener('click',()=>chooseTienChuc(c.dataset.tc));
+      });
+      wrap.dataset.built="1";
+    }
+  }
+  document.getElementById('linhDienCard').style.display = S.isImmortal ? "block":"none";
+  if(S.isImmortal){
+    const st = S.linhDienState;
+    document.getElementById('btnPlant').style.display = st==="empty"?"block":"none";
+    document.getElementById('btnHarvest').style.display = st==="ready"?"block":"none";
+    if(st==="empty") document.getElementById('linhDienStatus').textContent = "Trống — chưa gieo trồng";
+    if(st==="growing"){
+      const remain = Math.max(0,S.linhDienEnd-Date.now());
+      document.getElementById('linhDienStatus').textContent = "Đang phát triển... còn "+Math.ceil(remain/1000)+"s";
+      document.getElementById('linhDienProg').style.width = (100-(remain/(S.linhDienTotal*1000)*100))+"%";
+    }
+    if(st==="ready"){
+      document.getElementById('linhDienStatus').textContent = "Tiên Thảo đã trưởng thành, có thể thu hoạch!";
+      document.getElementById('linhDienProg').style.width = "100%";
+    }
+    if(st==="empty") document.getElementById('linhDienProg').style.width = "0%";
+  }
+  document.getElementById('btnBuyManual').disabled = S.hasManual;
+  document.getElementById('btnBuyManual').textContent = S.hasManual ? "Đã Sở Hữu" : "Mua (200 Linh Thạch)";
+  renderGongfaShop();
+
+  // alchemy
+  document.getElementById('danSuRank').textContent = DAN_SU_RANK[danSuRankIdx()];
+  document.getElementById('honCanhRank').textContent = HON_CANH[S.honCanhIdx];
+  document.getElementById('manualWarning').style.display = S.hasManual ? "none":"block";
+  document.getElementById('btnRefine').disabled = !S.hasManual || S.linhThach<100;
+  renderPills();
+}
+
+function renderGongfaShop(){
+  const wrap = document.getElementById('gongfaShop');
+  wrap.innerHTML = GONGFA_LIST.map(g=>{
+    const owned = S.ownedGongfa.includes(g.id);
+    const locked = g.needImmortal && !S.isImmortal;
+    const currency = g.needImmortal ? 'Tiên Tinh':'Linh Thạch';
+    const cost = g.needImmortal ? Math.ceil(g.cost/500) : g.cost;
+    return `<div class="item-row">
+      <div class="info">
+        <div class="name">${g.name} <span class="badge ${g.needImmortal?'myth':'gold'}">${g.tier}</span></div>
+        <div class="desc">Tốc độ tu luyện +${Math.round(g.bonus*100)}% ${locked?' (Cần Phi Thăng)':''}</div>
+      </div>
+      <button class="btn small" style="width:auto; margin:0;" data-gf="${g.id}" ${owned||locked?'disabled':''}>${owned?'Đã Học':fmt(cost)+' '+currency}</button>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll('[data-gf]').forEach(b=>{
+    b.addEventListener('click',()=>buyGongfa(b.dataset.gf));
+  });
+}
+
+function renderPills(){
+  const wrap = document.getElementById('pillInventory');
+  if(!S.pills.length){ wrap.innerHTML = '<p class="small-note">Túi đồ trống.</p>'; return; }
+  wrap.innerHTML = S.pills.map(p=>{
+    const effLabel = {tuvi:"Tăng Tu Vi", heal:"Hồi Sinh Lực", lifespan:"Tăng Thọ Nguyên"}[p.effect];
+    return `<div class="item-row">
+      <div class="info">
+        <div class="name">${p.name} <span class="badge ${p.q.badge}">${p.q.name}</span></div>
+        <div class="desc">Hiệu quả: ${effLabel} (x${p.q.mult})</div>
+      </div>
+      <button class="btn small" style="width:auto; margin:0;" data-use="${p.id}">Sử Dụng</button>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll('[data-use]').forEach(b=>{
+    b.addEventListener('click',()=>usePill(b.dataset.use));
+  });
+}
+
+function renderLog(){
+  const wrap = document.getElementById('logList');
+  if(!S.log.length){ wrap.innerHTML = '<p class="small-note">Chưa có sự kiện nào.</p>'; return; }
+  wrap.innerHTML = S.log.map(l=>`<div class="log-item"><span class="t">[${l.t}]</span>${l.m}</div>`).join("");
+}
+
+/* ===================================================================
+   TABS
+=================================================================== */
+function switchTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id===id));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+}
+
+/* ===================================================================
+   SAVE / LOAD
+=================================================================== */
+const SAVE_KEY = "sieututien_daiphithang_save_v1";
+function saveGame(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify(S));
+  }catch(e){}
+}
+function loadGame(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed;
+  }catch(e){ return null; }
+}
+function resetGame(){
+  if(!confirm("Phản Phác Quy Chân sẽ xóa toàn bộ tiến trình. Bạn có chắc chắn?")) return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+/* ===================================================================
+   INIT / EVENTS
+=================================================================== */
+function initEvents(){
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.addEventListener('click', ()=>switchTab(b.dataset.tab));
+  });
+
+  document.querySelectorAll('#modalFaction .choice-card').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      tempFaction = c.dataset.faction;
+      document.getElementById('modalFaction').classList.add('hidden');
+      document.getElementById('modalLinhCan').classList.remove('hidden');
+      document.body.classList.toggle('faction-ma', tempFaction==='ma');
+    });
+  });
+
+  document.getElementById('btnReroll').addEventListener('click', ()=>{
+    tempLinhCan = rollLinhCan(tempFaction);
+    document.getElementById('lcName').textContent = tempLinhCan.name;
+    document.getElementById('lcTier').innerHTML = `<span class="badge ${tempLinhCan.badge}">${tempLinhCan.tierName}</span> <span class="badge">Hệ số x${tempLinhCan.mult}</span>`;
+    document.getElementById('lcDesc').textContent = tempLinhCan.desc;
+    document.getElementById('btnConfirmLC').disabled = false;
+  });
+
+  document.getElementById('btnConfirmLC').addEventListener('click', ()=>{
+    if(!tempLinhCan) return;
+    S = DEFAULT_STATE();
+    S.started = true;
+    S.faction = tempFaction;
+    S.linhCan = tempLinhCan;
+    document.getElementById('modalLinhCan').classList.add('hidden');
+    log("🎉 Nhập Đạo thành công! Trận doanh: "+(tempFaction==='ma'?'Ma Đạo':'Chính Đạo')+". Linh Căn: "+tempLinhCan.name+".");
+    toast("Chào mừng nhập Đạo, "+ (tempFaction==='ma'?'Ma Tu':'Đạo Hữu') +"!");
+    render();
+    saveGame();
+  });
+
+  document.getElementById('btnBreakthrough').addEventListener('click', doBreakthrough);
+  document.getElementById('btnBurnLife').addEventListener('click', burnLifespan);
+  document.getElementById('btnExpedition').addEventListener('click', startExpedition);
+  document.getElementById('btnBuyManual').addEventListener('click', buyManual);
+  document.getElementById('btnReset').addEventListener('click', resetGame);
+  document.getElementById('btnRefine').addEventListener('click', refinePill);
+  document.getElementById('btnPlant').addEventListener('click', plantLinhDien);
+  document.getElementById('btnHarvest').addEventListener('click', harvestLinhDien);
+
+  document.getElementById('btnTribStrike').addEventListener('click', tribStrike);
+  document.getElementById('btnTribPill').addEventListener('click', tribUsePill);
+  document.getElementById('btnTribClose').addEventListener('click', ()=>{
+    document.getElementById('modalTribulation').classList.add('hidden');
+    document.getElementById('btnTribClose').style.display='none';
+    document.getElementById('btnTribStrike').disabled=false;
+    document.getElementById('btnTribPill').disabled=false;
+    render();
+  });
+}
+
+function boot(){
+  initEvents();
+  const loaded = loadGame();
+  if(loaded && loaded.started){
+    S = Object.assign(DEFAULT_STATE(), loaded);
+    S.lastTick = Date.now();
+    // offline progress catch-up (simple, capped at 2 hours)
+    const offlineSec = Math.min(7200, Math.max(0,(Date.now()-(loaded.lastSave||Date.now()))/1000));
+    if(offlineSec > 5 && S.started){
+      const gain = cultivationSpeedSafe()*offlineSec*8*0.5; // 50% efficiency offline
+      S.tuVi = Math.min(tuViMaxSafe(),S.tuVi+gain);
+      S.linhThach += offlineSec*1.5;
+      toast("Chào mừng trở lại! Đã tu luyện offline "+Math.floor(offlineSec/60)+" phút.");
+    }
+    if(S.faction==='ma') document.body.classList.add('faction-ma');
+    if(S.isImmortal) document.body.classList.add('ascended');
+    document.getElementById('modalFaction').classList.add('hidden');
+    renderLog();
+    render();
+  } else {
+    S = DEFAULT_STATE();
+    document.getElementById('modalFaction').classList.remove('hidden');
+  }
+
+  setInterval(tick, 1000);
+  setInterval(saveGame, 5000);
+  setInterval(()=>{ S.lastSave = Date.now(); }, 1000);
+}
+function cultivationSpeedSafe(){ try{return cultivationSpeed();}catch(e){return 1;} }
+function tuViMaxSafe(){ try{return tuViMax();}catch(e){return 999999;} }
+
+boot();
+
+})();
+</script>
+</body>
+</html>
